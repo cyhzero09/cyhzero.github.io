@@ -1,7 +1,705 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>同义词单词复习</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #f5f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      padding: 24px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .data-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      background: #f1f4f9;
+      padding: 12px 15px;
+      border-radius: 20px;
+    }
+    .data-bar select {
+      flex: 2;
+      min-width: 120px;
+      padding: 12px 15px;
+      border: 1px solid #dce2ec;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      background: white;
+      outline: none;
+      cursor: pointer;
+    }
+    .data-bar input {
+      flex: 3;
+      min-width: 150px;
+      padding: 12px 15px;
+      border: 1px solid #dce2ec;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .data-bar button {
+      padding: 12px 18px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .data-bar button:active {
+      background: #1d4ed8;
+    }
+    .mode-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      padding: 12px 20px;
+      background: #eef2f6;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    .mode-btn.active {
+      background: #2563eb;
+      color: white;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+    }
+    .progress {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #475569;
+      background: #f8fafc;
+      padding: 8px 15px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .progress span {
+      background: #2563eb;
+      color: white;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .question-box {
+      background: #f0f4ff;
+      border-radius: 24px;
+      padding: 25px 20px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      word-break: break-word;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #dbeafe;
+      transition: 0.2s;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 5px 0;
+    }
+    @media (max-width: 500px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .option-btn {
+      padding: 18px 10px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      word-break: break-word;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .option-btn:active {
+      transform: scale(0.97);
+    }
+    .option-btn.correct-guess {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: white;
+    }
+    .option-btn.wrong-guess {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: white;
+    }
+    .option-btn.dimmed {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .feedback {
+      text-align: center;
+      font-size: 1rem;
+      color: #334155;
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 16px;
+      min-height: 65px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.5;
+    }
+    .feedback strong {
+      color: #0f172a;
+    }
+    .reset-btn {
+      padding: 10px 20px;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: 0.2s;
+    }
+    .reset-btn:active {
+      background: #f1f5f9;
+    }
+    .finished-message {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #2563eb;
+      padding: 20px;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
 <body>
-  <h1>我的第一個免費網站</h1>
-  <p>Hello World!</p>
+<div class="container">
+  <h1>📘 单词复习</h1>
+
+  <!-- 数据集选择 -->
+  <div class="data-bar">
+    <select id="datasetSelect">
+      <option value="default">默认词库</option>
+    </select>
+    <input type="text" id="customUrlInput" placeholder="输入JSON文件URL" />
+    <button id="addDatasetBtn">添加</button>
+  </div>
+
+  <!-- 模式切换 -->
+  <div class="mode-tabs">
+    <button class="mode-btn active" data-mode="en2cn">🇬🇧→🇨🇳 英文选中文</button>
+    <button class="mode-btn" data-mode="cn2en">🇨🇳→🇬🇧 中文选英文</button>
+    <button class="mode-btn" data-mode="fill">📝 句子填空</button>
+  </div>
+
+  <!-- 进度条 -->
+  <div class="progress" id="progressDisplay">
+    进度 <span id="progressCount">0/0</span>
+    <button class="reset-btn" id="resetModeBtn">重新开始</button>
+  </div>
+
+  <!-- 题目区域 -->
+  <div class="question-box" id="questionText">加载中...</div>
+
+  <!-- 选项 -->
+  <div class="options-grid" id="optionsContainer">
+    <button class="option-btn">-</button>
+    <button class="option-btn">-</button>
+    <button class="option-btn">-</button>
+    <button class="option-btn">-</button>
+  </div>
+
+  <!-- 反馈 -->
+  <div class="feedback" id="feedbackArea">
+    请选择一个选项
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- 默认词库（用户提供）----------
+    const DEFAULT_WORDS = [
+      { word: "expand", synonyms: ["amplify"], meaning: "放大", sentence: "You need to expand your vocabulary to speak better.", translation: "你需要擴大詞彙量才能說得更好。" },
+      { word: "accomplish", synonyms: ["achieve"], meaning: "完成", sentence: "She worked hard to accomplish her goal.", translation: "她努力工作以完成她的目標。" },
+      { word: "acquire", synonyms: ["obtain"], meaning: "获得", sentence: "I want to acquire new skills for my job.", translation: "我想為我的工作獲得新技能。" },
+      { word: "advocate", synonyms: ["champion"], meaning: "擁護", sentence: "He advocates for better schools in the city.", translation: "他擁護在城市裡建立更好的學校。" },
+      { word: "alleviate", synonyms: ["mitigate"], meaning: "緩解", sentence: "This medicine will alleviate the pain.", translation: "這種藥會緩解疼痛。" },
+      { word: "analyze", synonyms: ["scrutinize"], meaning: "分析", sentence: "We need to analyze the problem carefully.", translation: "我們需要仔細分析這個問題。" },
+      { word: "anticipate", synonyms: ["foresee"], meaning: "預見", sentence: "I anticipate that the weather will be nice tomorrow.", translation: "我預見明天天氣會很好。" },
+      { word: "apprehend", synonyms: ["comprehend"], meaning: "理解", sentence: "She couldn't apprehend the complex instructions.", translation: "她無法理解那些複雜的指示。" },
+      { word: "artificial", synonyms: ["synthetic"], meaning: "人造的", sentence: "This flower is artificial, not real.", translation: "這朵花是人造的，不是真的。" },
+      { word: "ascertain", synonyms: ["determine"], meaning: "確定", sentence: "Can you ascertain the truth of the story?", translation: "你能確定這個故事的真實性嗎？" },
+      { word: "assemble", synonyms: ["compile"], meaning: "集合", sentence: "Let's assemble all the data for the report.", translation: "讓我們集合所有報告的數據。" },
+      { word: "assess", synonyms: ["evaluate"], meaning: "評估", sentence: "The teacher will assess our presentations.", translation: "老師會評估我們的簡報。" },
+      { word: "assimilate", synonyms: ["integrate"], meaning: "同化", sentence: "It takes time to assimilate into a new culture.", translation: "融入新文化需要時間同化。" },
+      { word: "augment", synonyms: ["enhance"], meaning: "增強", sentence: "Reading can augment your knowledge.", translation: "閱讀可以增強你的知識。" },
+      { word: "authentic", synonyms: ["genuine"], meaning: "真實的", sentence: "This is an authentic Chinese dish.", translation: "這是一道真實的中國菜。" },
+      { word: "autonomous", synonyms: ["independent"], meaning: "自治的", sentence: "The region became autonomous last year.", translation: "這個地區去年開始自治了。" },
+      { word: "bewildered", synonyms: ["perplexed"], meaning: "迷惑的", sentence: "I was bewildered by the map.", translation: "我對這張地圖感到迷惑。" },
+      { word: "blunt", synonyms: ["dull"], meaning: "遲鈍的", sentence: "This knife is too blunt to cut vegetables.", translation: "這把刀太鈍了，沒辦法切菜。" },
+      { word: "bolster", synonyms: ["reinforce"], meaning: "加強", sentence: "We need to bolster the team with new players.", translation: "我們需要通過新球員來加強隊伍。" },
+      { word: "brainstorm", synonyms: ["contemplate"], meaning: "極力思考", sentence: "Let's brainstorm ideas for the party.", translation: "讓我們極力思考派對的點子。" },
+      { word: "breach", synonyms: ["violate"], meaning: "違反", sentence: "He breached the contract by being late.", translation: "他因遲到而違反了合約。" },
+      { word: "burgeon", synonyms: ["flourish"], meaning: "迅速發展", sentence: "The small town began to burgeon into a city.", translation: "這個小鎮開始迅速發展成一個城市。" },
+      { word: "cease", synonyms: ["terminate"], meaning: "停止", sentence: "The company will cease operations next month.", translation: "這家公司下個月將停止營運。" },
+      { word: "circumvent", synonyms: ["bypass"], meaning: "避免", sentence: "He tried to circumvent the traffic jam.", translation: "他試圖避開交通堵塞。" },
+      { word: "coherent", synonyms: ["cohesive"], meaning: "連貫的", sentence: "Her speech was clear and coherent.", translation: "她的演講清晰且連貫。" },
+      { word: "collaborate", synonyms: ["cooperate"], meaning: "合作", sentence: "We will collaborate on this project.", translation: "我們將在這個專案上合作。" },
+      { word: "commendable", synonyms: ["praiseworthy"], meaning: "值得稱讚的", sentence: "Your hard work is commendable.", translation: "你的努力工作是值得稱讚的。" },
+      { word: "compensate", synonyms: ["recompense"], meaning: "補償", sentence: "The company will compensate you for your loss.", translation: "公司會補償你的損失。" },
+      { word: "complement", synonyms: ["enhance"], meaning: "補充", sentence: "This wine complements the food perfectly.", translation: "這款酒完美地補充了這道菜。" },
+      { word: "comprehensive", synonyms: ["exhaustive"], meaning: "全面的", sentence: "The guide provides comprehensive information.", translation: "這本指南提供了全面的資訊。" },
+      { word: "comprise", synonyms: ["consist of"], meaning: "包括", sentence: "The team comprises five people.", translation: "這個團隊包括五個人。" },
+      { word: "conceive", synonyms: ["conceptualize"], meaning: "構思", sentence: "She conceived a brilliant plan.", translation: "她構思了一個絕妙的計劃。" },
+      { word: "concise", synonyms: ["succinct"], meaning: "簡潔的", sentence: "Please give a concise summary.", translation: "請給一個簡潔的總結。" },
+      { word: "confront", synonyms: ["encounter"], meaning: "面臨", sentence: "We must confront the challenges ahead.", translation: "我們必須面臨前方的挑戰。" },
+      { word: "congruent", synonyms: ["compatible"], meaning: "一致的", sentence: "Their goals are congruent with ours.", translation: "他們的目標和我們是一致的。" },
+      { word: "considerable", synonyms: ["substantial"], meaning: "相當大的", sentence: "He has considerable experience in teaching.", translation: "他有相當大的教學經驗。" },
+      { word: "consistent", synonyms: ["coherent"], meaning: "一致的", sentence: "His actions are consistent with his words.", translation: "他的行動和他的話語是一致的。" },
+      { word: "contemplate", synonyms: ["ponder"], meaning: "沉思", sentence: "She sat alone, contemplating the problem.", translation: "她獨自坐著，沉思這個問題。" },
+      { word: "contradict", synonyms: ["negate"], meaning: "矛盾", sentence: "His statement contradicts the facts.", translation: "他的陳述與事實矛盾。" },
+      { word: "conventional", synonyms: ["orthodox"], meaning: "傳統的", sentence: "They had a conventional wedding.", translation: "他們舉辦了一場傳統的婚禮。" }
+    ];
+
+    // ---------- 全局状态 ----------
+    let words = [...DEFAULT_WORDS];                // 当前词库
+    let currentMode = 'en2cn';                     // en2cn / cn2en / fill
+    // 每个模式的剩余单词索引
+    let modeRemaining = {
+      en2cn: [],
+      cn2en: [],
+      fill: []
+    };
+    let currentQuestion = null;                    // 当前题目对象
+    let lockOptions = false;                       // 答题后锁定选项
+    let timer = null;
+
+    // ---------- DOM 元素 ----------
+    const qText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const progressCount = document.getElementById('progressCount');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const resetModeBtn = document.getElementById('resetModeBtn');
+    const datasetSelect = document.getElementById('datasetSelect');
+    const customUrlInput = document.getElementById('customUrlInput');
+    const addDatasetBtn = document.getElementById('addDatasetBtn');
+
+    // ---------- 工具函数 ----------
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function getRemaining() {
+      return modeRemaining[currentMode];
+    }
+
+    // 重置当前模式进度
+    function resetCurrentMode() {
+      modeRemaining[currentMode] = words.map((_, idx) => idx);
+      shuffleArray(modeRemaining[currentMode]);
+      lockOptions = false;
+      clearFeedback();
+      if (modeRemaining[currentMode].length > 0) {
+        loadNextQuestion();
+      } else {
+        showFinished();
+      }
+      updateProgress();
+    }
+
+    // 重置所有模式
+    function resetAllModes() {
+      ['en2cn', 'cn2en', 'fill'].forEach(mode => {
+        modeRemaining[mode] = words.map((_, idx) => idx);
+        shuffleArray(modeRemaining[mode]);
+      });
+      lockOptions = false;
+      clearFeedback();
+      if (getRemaining().length > 0) {
+        loadNextQuestion();
+      } else {
+        showFinished();
+      }
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const rem = getRemaining();
+      const total = words.length;
+      const done = total - rem.length;
+      progressCount.textContent = `${done}/${total}`;
+    }
+
+    function clearFeedback() {
+      feedbackArea.innerHTML = '请选择一个选项';
+    }
+
+    // 显示完成信息
+    function showFinished() {
+      qText.textContent = '🎉 已完成所有题目！';
+      optionsContainer.innerHTML = '';
+      feedbackArea.innerHTML = '太棒了！点击下方“重新开始”继续练习。';
+      progressCount.textContent = `${words.length}/${words.length}`;
+    }
+
+    // 获取随机错误选项索引 (排除自身及同义词)
+    function getRandomDistractors(correctIdx, count, excludeSynonyms = []) {
+      const allIndices = words.map((_, i) => i);
+      const pool = allIndices.filter(i => {
+        if (i === correctIdx) return false;
+        const w = words[i];
+        // 检查是否是同义词
+        const correctWord = words[correctIdx];
+        const allBadWords = [correctWord.word, ...correctWord.synonyms];
+        if (allBadWords.includes(w.word)) return false;
+        // 如果错误选项的词本身有同义词列表，且包含正确单词，也排除（防止对称）
+        if (w.synonyms.includes(correctWord.word)) return false;
+        return true;
+      });
+      const shuffled = shuffleArray([...pool]);
+      return shuffled.slice(0, count);
+    }
+
+    // 生成题目
+    function generateQuestion(wordIndex) {
+      const wordObj = words[wordIndex];
+      const mode = currentMode;
+      let questionText = '';
+      let options = [];
+      let correctAnswer = '';
+
+      if (mode === 'en2cn') {
+        // 英文选中文：显示英文，选项是中文意思
+        questionText = wordObj.word;
+        correctAnswer = wordObj.meaning;
+        const distractorsIdx = getRandomDistractors(wordIndex, 3, []); // 不排除同义词，因为选项是中文，中文自然不同
+        const distractorMeanings = distractorsIdx.map(i => words[i].meaning);
+        options = [correctAnswer, ...distractorMeanings];
+      } else if (mode === 'cn2en') {
+        // 中文选英文：显示中文意思，选项是英文单词，需排除同义词
+        questionText = wordObj.meaning;
+        correctAnswer = wordObj.word;
+        const distractorsIdx = getRandomDistractors(wordIndex, 3, wordObj.synonyms);
+        const distractorWords = distractorsIdx.map(i => words[i].word);
+        options = [correctAnswer, ...distractorWords];
+      } else if (mode === 'fill') {
+        // 句子填空：显示挖空句子，选项是英文单词，需排除同义词
+        const sentence = wordObj.sentence;
+        if (!sentence || sentence.trim() === '') {
+          // 如果没有句子，则降级为英文选中文
+          questionText = `(无句子) ${wordObj.word}`;
+          correctAnswer = wordObj.meaning;
+          const dIdx = getRandomDistractors(wordIndex, 3, []);
+          options = [correctAnswer, ...dIdx.map(i => words[i].meaning)];
+        } else {
+          // 替换目标词为______ (保留大小写忽略？简单替换)
+          const regex = new RegExp(`\\b${wordObj.word}\\b`, 'i');
+          const blankSentence = sentence.replace(regex, '______');
+          questionText = blankSentence;
+          correctAnswer = wordObj.word;
+          const distractorsIdx = getRandomDistractors(wordIndex, 3, wordObj.synonyms);
+          const distractorWords = distractorsIdx.map(i => words[i].word);
+          options = [correctAnswer, ...distractorWords];
+        }
+      }
+
+      // 打乱选项
+      const shuffledOptions = shuffleArray([...options]);
+      return {
+        wordIndex,
+        questionText,
+        options: shuffledOptions,
+        correctAnswer,
+        wordObj
+      };
+    }
+
+    // 加载下一题
+    function loadNextQuestion() {
+      if (lockOptions) return;
+      const remaining = getRemaining();
+      if (remaining.length === 0) {
+        showFinished();
+        return;
+      }
+      // 取最后一个（或者随机取，目前 remaining 已随机排序，可用 pop）
+      const idx = remaining.pop(); 
+      currentQuestion = generateQuestion(idx);
+      renderQuestion(currentQuestion);
+      updateProgress();
+    }
+
+    function renderQuestion(question) {
+      qText.textContent = question.questionText;
+      optionsContainer.innerHTML = '';
+      question.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => handleOptionClick(opt, btn));
+        optionsContainer.appendChild(btn);
+      });
+      clearFeedback();
+      lockOptions = false;
+    }
+
+    function handleOptionClick(selected, clickedBtn) {
+      if (lockOptions || !currentQuestion) return;
+      lockOptions = true;
+
+      const allButtons = document.querySelectorAll('.option-btn');
+      const correct = currentQuestion.correctAnswer;
+      const isCorrect = (selected === correct);
+      const wordObj = currentQuestion.wordObj;
+
+      // 高亮按钮
+      allButtons.forEach(btn => {
+        btn.classList.add('dimmed');
+        if (btn.textContent === correct) {
+          btn.classList.add('correct-guess');
+        }
+        if (btn === clickedBtn && !isCorrect) {
+          btn.classList.add('wrong-guess');
+        }
+      });
+
+      // 显示反馈（句子对照）
+      let feedbackHtml = '';
+      if (isCorrect) {
+        feedbackHtml = '✅ <strong>正确！</strong><br>';
+      } else {
+        feedbackHtml = `❌ <strong>错误</strong>，正确答案是：<strong>${correct}</strong><br>`;
+      }
+      if (wordObj.sentence && wordObj.translation) {
+        feedbackHtml += `📖 ${wordObj.sentence}<br>💬 ${wordObj.translation}`;
+      } else if (wordObj.sentence) {
+        feedbackHtml += `📖 ${wordObj.sentence}`;
+      }
+      feedbackArea.innerHTML = feedbackHtml;
+
+      // 2.5秒后自动下一题
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (getRemaining().length === 0) {
+          showFinished();
+        } else {
+          loadNextQuestion();
+        }
+        timer = null;
+      }, 2200);
+    }
+
+    // 切换模式
+    function switchMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+      // 更新按钮激活样式
+      modeBtns.forEach(b => {
+        if (b.dataset.mode === mode) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      lockOptions = false;
+      if (timer) { clearTimeout(timer); timer = null; }
+      const rem = getRemaining();
+      if (rem.length === 0) {
+        showFinished();
+      } else {
+        loadNextQuestion();
+      }
+      updateProgress();
+    }
+
+    // ---------- 数据集加载 ----------
+    function loadWordsFromArray(wordArray) {
+      words = wordArray;
+      // 重置所有模式
+      resetAllModes();
+    }
+
+    function loadDefaultWords() {
+      loadWordsFromArray([...DEFAULT_WORDS]);
+    }
+
+    async function loadRemoteDataset(url) {
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('网络错误');
+        const data = await resp.json();
+        if (!Array.isArray(data)) throw new Error('JSON格式应为数组');
+        // 简单验证字段
+        if (data.length > 0 && !data[0].hasOwnProperty('word')) {
+          throw new Error('缺少必要字段 word');
+        }
+        loadWordsFromArray(data);
+        return true;
+      } catch (err) {
+        alert('加载数据集失败：' + err.message);
+        return false;
+      }
+    }
+
+    // 管理自定义数据集 (localStorage)
+    function getCustomDatasets() {
+      try {
+        const stored = localStorage.getItem('customWordDatasets');
+        return stored ? JSON.parse(stored) : [];
+      } catch { return []; }
+    }
+
+    function saveCustomDatasets(list) {
+      localStorage.setItem('customWordDatasets', JSON.stringify(list));
+    }
+
+    function addCustomDataset(name, url) {
+      const datasets = getCustomDatasets();
+      // 去重或更新
+      const exist = datasets.find(d => d.url === url);
+      if (!exist) {
+        datasets.push({ name, url });
+        saveCustomDatasets(datasets);
+        updateDatasetSelect();
+      }
+    }
+
+    function removeCustomDataset(url) {
+      let datasets = getCustomDatasets();
+      datasets = datasets.filter(d => d.url !== url);
+      saveCustomDatasets(datasets);
+      updateDatasetSelect();
+    }
+
+    function updateDatasetSelect() {
+      const select = datasetSelect;
+      // 清空，保留默认
+      select.innerHTML = '<option value="default">默认词库</option>';
+      const customs = getCustomDatasets();
+      customs.forEach((ds, idx) => {
+        const opt = document.createElement('option');
+        opt.value = ds.url;
+        opt.textContent = ds.name || `自定义${idx+1}`;
+        select.appendChild(opt);
+      });
+    }
+
+    // 数据集选择事件
+    datasetSelect.addEventListener('change', async (e) => {
+      const val = e.target.value;
+      if (val === 'default') {
+        loadDefaultWords();
+      } else {
+        const success = await loadRemoteDataset(val);
+        if (!success) {
+          // 加载失败，切回默认
+          datasetSelect.value = 'default';
+          loadDefaultWords();
+        }
+      }
+    });
+
+    addDatasetBtn.addEventListener('click', () => {
+      const url = customUrlInput.value.trim();
+      if (!url) {
+        alert('请输入JSON文件的URL');
+        return;
+      }
+      const name = prompt('为这个数据集起个名字（可选）：', '自定义词库');
+      addCustomDataset(name || '自定义词库', url);
+      customUrlInput.value = '';
+      // 自动切换到新数据集
+      datasetSelect.value = url;
+      loadRemoteDataset(url).then(success => {
+        if (!success) {
+          datasetSelect.value = 'default';
+          loadDefaultWords();
+        }
+      });
+    });
+
+    // 重置按钮
+    resetModeBtn.addEventListener('click', () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+      resetCurrentMode();
+    });
+
+    // 模式按钮事件
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        switchMode(mode);
+      });
+    });
+
+    // 初始化
+    function init() {
+      updateDatasetSelect();
+      loadDefaultWords();
+    }
+
+    init();
+  })();
+</script>
 </body>
 </html>
